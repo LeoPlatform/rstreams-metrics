@@ -3,7 +3,7 @@ import leoLogger from "leo-logger";
 import { KMSService, MetricsConfig, MetricsListener } from 'datadog-lambda-js/dist/metrics';
 import { getEnvValue, removeColon } from "./utils";
 
-const logger = leoLogger("datadog-reporter");
+const logger = leoLogger("rstreams-metrics").sub("datadog-reporter");
 
 export interface DataDogConfig extends MetricsConfig {
 	key?: string;
@@ -15,6 +15,7 @@ export class DataDogReporter implements MetricReporter {
 
 	static GetStaticReporter(configs: ReporterConfigs): DataDogReporter | null {
 		let ddConfig = configs.DataDog || {};
+		ddConfig.dontSendMetrics = configs.dontSendMetrics;
 		if (ddConfig.apiKey || ddConfig.key || getEnvValue(DataDogReporter.apiKeyEnvVar, "") || getEnvValue(DataDogReporter.apiKeyKMSEnvVar, "")) {
 			return new DataDogReporter(ddConfig);
 		}

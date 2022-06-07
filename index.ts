@@ -33,9 +33,7 @@ export class DynamicMetricReporter implements MetricReporter {
 
 	async start() {
 		await this.setupPromise;
-		await Promise.all(this.reporters.map(reporter => {
-			reporter.start();
-		}));
+		await Promise.all(this.reporters.map(reporter => reporter.start()));
 	}
 	log(metric: Metric) {
 
@@ -50,8 +48,6 @@ export class DynamicMetricReporter implements MetricReporter {
 		});
 	}
 	async end() {
-		await Promise.all(this.reporters.map(reporter => {
-			reporter.end();
-		}));
+		await Promise.all(this.reporters.map(reporter => reporter.end()));
 	}
 }

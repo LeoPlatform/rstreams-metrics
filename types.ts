@@ -14,5 +14,6 @@ export interface MetricReporter {
 }
 
 export interface ReporterConfigs {
-	DataDog?: Partial<DataDogConfig>
+	DataDog?: Partial<DataDogConfig>,
+	dontSendMetrics?: boolean,
 }
