@@ -1,0 +1,43 @@
+{
+	"name": "rstreams-metrics",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"coverage-all": "node ./node_modules/nyc/bin/nyc.js --all node ./node_modules/mocha/bin/mocha --timeout 5000 \"./{,!(node_modules)/**/}*.utest.js\"",
+		"coverage": "node ./node_modules/nyc/bin/nyc.js node ./node_modules/mocha/bin/mocha --timeout 5000 \"./{,!(node_modules)/**/}*.utest.js\"",
+		"utest": "mocha \"**/*.utest.js\"",
+		"package": "serverless package",
+		"watch": "tsc -w",
+		"webpack": "webpack",
+		"compile": "tsc",
+		"lint": "eslint ."
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/chai": "^4.3.0",
+		"@types/mocha": "^9.1.0",
+		"@types/node": "^16.11.12",
+		"@types/sinon": "^10.0.11",
+		"@types/sinon-chai": "^3.2.8",
+		"@typescript-eslint/eslint-plugin": "^5.20.0",
+		"@typescript-eslint/parser": "^5.20.0",
+		"chai": "^4.2.0",
+		"mocha": "^9.2.2",
+		"nyc": "^15.1.0",
+		"sinon": "^13.0.1",
+		"sinon-chai": "^3.7.0",
+		"typescript": "^4.6.2",
+		"eslint": "^5.9.0",
+		"eslint-config-standard": "^12.0.0",
+		"eslint-plugin-import": "^2.14.0",
+		"eslint-plugin-node": "^8.0.0",
+		"eslint-plugin-promise": "^4.0.1",
+		"eslint-plugin-standard": "^4.0.0"
+	},
+	"dependencies": {
+		"datadog-lambda-js": "^6.78.0",
+		"leo-logger": "^1.0.1"
+	}
+}
