@@ -2,7 +2,7 @@ import { DataDogReporter } from "./datadog-reporter";
 import leoLogger from "leo-logger";
 import { Metric, MetricReporter, ReporterConfigs } from "./types";
 import { getDefaultMetricTags } from "./utils";
-
+export * from "./utils";
 const logger = leoLogger("rstreams-metrics");
 
 export class DynamicMetricReporter implements MetricReporter {
