@@ -81,9 +81,11 @@ function getBotTags(bot: Bot): Record<string, string> {
 }
 
 const EnvRegex = /(dev|test|staging|stage|production|prod)/i;
+const nodeEnvName = "NODE_ENV"; // Some bundlers will rewrite this to a hard coded value.  We only want it when it is specifically set.
 function getEnvironment(bus?: string): string {
 	// From env
-	let env = process.env.LEO_ENVIRONMENT || process.env.NODE_ENV;
+
+	let env = process.env.LEO_ENVIRONMENT || process.env[nodeEnvName];
 
 	if (!env && process.env.AWS_LAMBDA_FUNCTION_NAME) {
 		env = (process.env.AWS_LAMBDA_FUNCTION_NAME.match(EnvRegex) || [])[1];
