@@ -14,7 +14,8 @@
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
 		"baseUrl": ".",
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"declaration": true
 	},
 	"include": [
 		"**/*.ts"
@@ -24,6 +25,7 @@
 		".serverless/**/*",
 		".webpack/**/*",
 		"_warmup/**/*",
-		".vscode/**/*"
+		".vscode/**/*",
+		"dist/**/*"
 	]
 }
