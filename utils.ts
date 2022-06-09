@@ -185,6 +185,7 @@ export function getDefaultMetricTags(): Record<string, string> {
 		...botTags,
 		bot: botId,
 		environment: environment,
+		env: environment,
 		bus: bus,
 		iid: bot.iid,
 		service: "rstreams",
