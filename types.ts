@@ -4,7 +4,7 @@ export interface Metric {
 	id: string,
 	value: number,
 	timestamp?: Date,
-	tags: Record<string, string>
+	tags: Record<string, string | string[]>
 }
 
 export interface MetricReporter {

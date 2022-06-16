@@ -83,8 +83,15 @@ export class DataDogReporter implements MetricReporter {
 		// Map object tags to a string array
 		// colons seperate the key:value in the tags
 		let tags = Object.entries(metric.tags || {})
-			.filter(([_key, value]) => value != null && value != "")
-			.map(([key, value]) => `${removeColon(key)}:${removeColon(value)}`);
+			.filter(([_key, value]) => value != null)
+			.map(([key, value]) => {
+				let cleanKey = removeColon(key);
+				if (Array.isArray(value)) {
+					return value.map(value => `${cleanKey}:${removeColon(value)}`);
+				} else {
+					return [`${cleanKey}:${removeColon(value)}`];
+				}
+			}).reduce((all, one) => all.concat(one), []);
 
 		// Send it all to DataDog
 		logger.debug(metricId, metric.value, ...tags);

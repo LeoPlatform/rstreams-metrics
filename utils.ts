@@ -59,20 +59,23 @@ function determineBotWorkflow(bot: Bot, environment: string): string | undefined
  * @param bot 
  * @returns the value of the bot tag `app`
  */
-function getBotTags(bot: Bot): Record<string, string> {
+function getBotTags(bot: Bot): Record<string, string[]> {
 	// Get all tags that follow the pattern key:value
-	let botTags: Record<string, string> = (bot.tags || "").split(",").reduce((tags, t) => {
+	let botTags: Record<string, string[]> = (bot.tags || "").split(",").reduce((tags, t) => {
 		let [_, key, value] = t.match(/^(.*?):(.*)$/) || [];
 		if (key && value) {
-			tags[key] = value;
+			if (!tags[key]) {
+				tags[key] = []
+			}
+			tags[key].push(value);
 		}
 		return tags;
-	}, {});
+	}, {} as Record<string, string[]>);
 
 	if (!botTags.app && process.env.AWS_LAMBDA_FUNCTION_NAME) {
 		let app = process.env.AWS_LAMBDA_FUNCTION_NAME.split(/^(.*?)-(?:dev|test|staging|stage|production|prod)-/i);
 		if (app && app.length > 1 && app[1]) {
-			botTags.app = app[1];
+			botTags.app = [app[1]];
 		}
 	}
 
@@ -160,14 +163,13 @@ interface Bot {
 
 function getBot(): Bot {
 	let registry = (process as any).__config?.registry || {};
-	let bot = registry.__cron || {
-		id: registry.id || process.env.AWS_LAMBDA_FUNCTION_NAME
-	}
-	bot.lambdaName = process.env.AWS_LAMBDA_FUNCTION_NAME;
-
-	if (bot.iid == null) {
-		bot.iid = "0";
-	}
+	let bot = {
+		id: registry.id || process.env.AWS_LAMBDA_FUNCTION_NAME,
+		iid: "0",
+		...registry.__event,
+		...registry.__cron,
+		lambdaName: process.env.AWS_LAMBDA_FUNCTION_NAME
+	};
 	return bot;
 }
 
@@ -185,7 +187,6 @@ export function getDefaultMetricTags(): Record<string, string> {
 		...botTags,
 		bot: botId,
 		environment: environment,
-		env: environment,
 		bus: bus,
 		iid: bot.iid,
 		service: "rstreams",
