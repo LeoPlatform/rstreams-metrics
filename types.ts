@@ -1,10 +1,12 @@
+import { AWSConfig } from "aws-reporter";
 import { DataDogConfig } from "./datadog-reporter";
 
 export interface Metric {
 	id: string,
 	value: number,
 	timestamp?: Date,
-	tags: Record<string, string | string[]>
+	tags?: Record<string, string | string[]>,
+	units?: string,
 }
 
 export interface MetricReporter {
@@ -14,6 +16,7 @@ export interface MetricReporter {
 }
 
 export interface ReporterConfigs {
+	AWS?: Partial<AWSConfig>,
 	DataDog?: Partial<DataDogConfig>,
 	dontSendMetrics?: boolean,
 }

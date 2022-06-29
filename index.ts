@@ -1,13 +1,14 @@
+import { AwsReporter } from "./aws-reporter";
 import { DataDogReporter } from "./datadog-reporter";
-import leoLogger from "leo-logger";
 import { Metric, MetricReporter, ReporterConfigs } from "./types";
 import { getDefaultMetricTags } from "./utils";
 export * from "./utils";
-const logger = leoLogger("rstreams-metrics");
+export * from "./types";
 
 export class DynamicMetricReporter implements MetricReporter {
 	static ReporterChecker: ((configs: ReporterConfigs) => MetricReporter | null)[] = [
-		DataDogReporter.GetStaticReporter
+		DataDogReporter.GetStaticReporter,
+		AwsReporter.GetStaticReporter
 	];
 
 	private reporters: MetricReporter[];
@@ -25,7 +26,7 @@ export class DynamicMetricReporter implements MetricReporter {
 			if (reporters != null && Array.isArray(reporters)) {
 				this.reporters = reporters;
 			} else {
-				this.reporters = DynamicMetricReporter.ReporterChecker.map(constructor => constructor(reporters as ReporterConfigs)).filter(r => r != null);
+				this.reporters = DynamicMetricReporter.ReporterChecker.map(constructor => constructor((reporters || {}) as ReporterConfigs)).filter(r => r != null);
 			}
 		});
 
