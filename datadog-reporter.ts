@@ -14,7 +14,7 @@ export interface DataDogConfig extends MetricsConfig {
 export class DataDogReporter implements MetricReporter {
 
 	static GetStaticReporter(configs: ReporterConfigs): DataDogReporter | null {
-		let ddConfig = configs.DataDog || {};
+		const ddConfig = configs.DataDog || {};
 		ddConfig.dontSendMetrics = configs.dontSendMetrics;
 		if (ddConfig.apiKey || ddConfig.key || getEnvValue(DataDogReporter.apiKeyEnvVar, "") || getEnvValue(DataDogReporter.apiKeyKMSEnvVar, "")) {
 			return new DataDogReporter(ddConfig);
@@ -46,7 +46,7 @@ export class DataDogReporter implements MetricReporter {
 
 	constructor(config?: Partial<DataDogConfig>) {
 
-		let dontSendMetrics = (config && config.dontSendMetrics === true) || (getEnvValue(DataDogReporter.dontSendEnvVar, "false") || "false") === "true";
+		const dontSendMetrics = (config && config.dontSendMetrics === true) || (getEnvValue(DataDogReporter.dontSendEnvVar, "false") || "false") === "true";
 
 		//this.sendMetrics = (config && config.dontSendMetrics !== true) || (getEnvValue(DataDogReporter.dontSendEnvVar, "false") || "false") !== "true"
 		this.sendMetrics = !dontSendMetrics;
@@ -56,7 +56,7 @@ export class DataDogReporter implements MetricReporter {
 			config.siteURL = config.site;
 		}
 		if (config.key && !config.apiKey) {
-			config.apiKey = config.key
+			config.apiKey = config.key;
 		}
 
 		this.metricsListener = new MetricsListener(this.kmsService, {
@@ -78,14 +78,14 @@ export class DataDogReporter implements MetricReporter {
 	}
 
 	log(metric: Metric) {
-		let metricId = metric.id;
+		const metricId = metric.id;
 
 		// Map object tags to a string array
 		// colons seperate the key:value in the tags
-		let tags = Object.entries(metric.tags || {})
+		const tags = Object.entries(metric.tags || {})
 			.filter(([_key, value]) => value != null)
 			.map(([key, value]) => {
-				let cleanKey = removeColon(key);
+				const cleanKey = removeColon(key);
 				if (Array.isArray(value)) {
 					return value.map(value => `${cleanKey}:${removeColon(value)}`);
 				} else {

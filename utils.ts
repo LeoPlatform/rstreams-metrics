@@ -1,3 +1,34 @@
+export interface ProcessPlus {
+	__config?: {
+		registry?: {
+			id?: string;
+			context?: {
+				sdk?: {
+					configuration: unknown;
+					LeoCron?: string;
+					resources?: {
+						LeoCron: string;
+					};
+				}
+			},
+			__cron?: Record<string, unknown>,
+			__event?: Record<string, unknown>,
+		}
+	}
+}
+
+export interface GlobalPlus {
+	leosdk?: {
+		resources: { LeoCron: string }
+	}
+}
+
+interface Bot {
+	iid: string;
+	id: string,
+	lambdaName?: string,
+	tags?: string
+}
 
 export const metricEnvPrefix = "RSTREAMS_METRICS_";
 
@@ -14,25 +45,14 @@ export function getEnvValue(key: string, defaultValue: string): string {
 function determineBotWorkflow(bot: Bot, environment: string): string | undefined {
 
 	// Get the workflow: tag from the bot
-	let workflowTag = ((bot.tags || "").split(",").find(t => t.match(/^workflow:/)) || "").split(":")[1]
+	const workflowTag = ((bot.tags || "").split(",").find(t => t.match(/^workflow:/)) || "").split(":")[1];
 	if (workflowTag) {
 		return workflowTag;
 	}
 
 
-	let id = (bot.id || "").toLowerCase();
-	let lambdaName = (bot.lambdaName || "").toLowerCase();
-
-	// Search for any known matching groups
-
-	let fallbackGroup = undefined;
-
-	if (fallbackGroup) {
-		if (fallbackGroup.id_regex) {
-			return (id.match(fallbackGroup.id_regex) || [])[1] || fallbackGroup.id
-		}
-		return fallbackGroup.id;
-	}
+	const id = (bot.id || "").toLowerCase();
+	const lambdaName = (bot.lambdaName || "").toLowerCase();
 
 	// Regex for finding bot workflow from id or lambdaName
 	const startsWithNameAndStage = new RegExp(`^([A-z_-]+?)[./\\-_\\b]*${environment}`, "i");
@@ -40,7 +60,7 @@ function determineBotWorkflow(bot: Bot, environment: string): string | undefined
 	const endsWithStage = new RegExp(`([A-z_-]+?)[./\\-_\\b]*${environment}$`, "i");
 
 	// Try to parse the bot id and lambda name
-	let element = [id, lambdaName].map(id =>
+	const element = [id, lambdaName].map(id =>
 		(id.match(startsWithNameAndStage) || [])[1] ||
 		(id.match(startsWithStage) || [])[1] ||
 		(id.match(endsWithStage) || [])[1])
@@ -61,11 +81,11 @@ function determineBotWorkflow(bot: Bot, environment: string): string | undefined
  */
 function getBotTags(bot: Bot): Record<string, string[]> {
 	// Get all tags that follow the pattern key:value
-	let botTags: Record<string, string[]> = (bot.tags || "").split(",").reduce((tags, t) => {
-		let [_, key, value] = t.match(/^(.*?):(.*)$/) || [];
+	const botTags: Record<string, string[]> = (bot.tags || "").split(",").reduce((tags, t) => {
+		const [, key, value] = t.match(/^(.*?):(.*)$/) || [];
 		if (key && value) {
 			if (!tags[key]) {
-				tags[key] = []
+				tags[key] = [];
 			}
 			tags[key].push(value);
 		}
@@ -73,7 +93,7 @@ function getBotTags(bot: Bot): Record<string, string[]> {
 	}, {} as Record<string, string[]>);
 
 	if (!botTags.app && process.env.AWS_LAMBDA_FUNCTION_NAME) {
-		let app = process.env.AWS_LAMBDA_FUNCTION_NAME.split(/^(.*?)-(?:dev|test|staging|stage|production|prod)-/i);
+		const app = process.env.AWS_LAMBDA_FUNCTION_NAME.split(/^(.*?)-(?:dev|test|staging|stage|production|prod)-/i);
 		if (app && app.length > 1 && app[1]) {
 			botTags.app = [app[1]];
 		}
@@ -111,7 +131,7 @@ function getBus(): string | null {
 			bus: null
 		};
 
-		let rstreamsEnv = [
+		const rstreamsEnv = [
 			process.env.RSTREAMS_CONFIG,
 			process.env.leosdk,
 			process.env.leo_sdk,
@@ -136,13 +156,13 @@ function getBus(): string | null {
 			}
 		}
 		// From  rstreams config
-		if (!rstreamsConfig && (global as any).leosdk) {
-			rstreamsConfig = (global as any).leosdk as { resources: { LeoCron: string } };
+		if (!rstreamsConfig && (global as GlobalPlus).leosdk) {
+			rstreamsConfig = (global as GlobalPlus).leosdk;
 		}
 
 		// Pull from context sdk
-		let p = process as any;
-		if (!rstreamsConfig && p?.__config?.registry?.context?.sdk?.configuration) {
+		const p = process as ProcessPlus;
+		if (!rstreamsConfig && p.__config?.registry?.context?.sdk?.configuration) {
 			rstreamsConfig = p.__config.registry.context.sdk.configuration;
 		}
 
@@ -151,19 +171,16 @@ function getBus(): string | null {
 		}
 	}
 
-	return busConfig.bus
+	return busConfig.bus;
 }
 
-interface Bot {
-	iid: string;
-	id: string,
-	lambdaName?: string,
-	tags?: string
+export function clearBusConfig() {
+	busConfig = undefined;
 }
 
 function getBot(): Bot {
-	let registry = (process as any).__config?.registry || {};
-	let bot = {
+	const registry = (process as ProcessPlus).__config?.registry || {};
+	const bot = {
 		id: registry.id || process.env.AWS_LAMBDA_FUNCTION_NAME,
 		iid: "0",
 		...registry.__event,
@@ -173,15 +190,15 @@ function getBot(): Bot {
 	return bot;
 }
 
-export function getDefaultMetricTags(): Record<string, string> {
+export function getDefaultMetricTags(): Record<string, string | string[]> {
 
-	let bot = getBot();
+	const bot = getBot();
 
-	let botId = bot.id;
-	let botTags = getBotTags(bot);
-	let bus = getBus();
-	let environment = getEnvironment(bus);
-	let workflow = determineBotWorkflow(bot, environment);
+	const botId = bot.id;
+	const botTags = getBotTags(bot);
+	const bus = getBus();
+	const environment = getEnvironment(bus);
+	const workflow = determineBotWorkflow(bot, environment);
 	return {
 		workflow: workflow ? workflow.toLowerCase() : null,
 		...botTags,
@@ -190,5 +207,5 @@ export function getDefaultMetricTags(): Record<string, string> {
 		bus: bus,
 		iid: bot.iid,
 		service: "rstreams",
-	}
+	};
 }
