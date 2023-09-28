@@ -1,6 +1,6 @@
 {
 	"name": "rstreams-metrics",
-	"version": "1.0.5",
+	"version": "1.0.9-alpha",
 	"description": "",
 	"main": "index.js",
 	"types": "index.d.ts",
@@ -12,7 +12,9 @@
 		"watch": "tsc -w",
 		"webpack": "webpack",
 		"compile": "tsc",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"prepublish": "cp package.json dist/package.json && cd dist",
+		"postpublish": "cd .."
 	},
 	"author": "",
 	"license": "ISC",

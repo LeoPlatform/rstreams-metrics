@@ -1,4 +1,4 @@
-import { AWSConfig } from "aws-reporter";
+import { AWSConfig } from "./aws-reporter";
 import { DataDogConfig } from "./datadog-reporter";
 
 export interface Metric {
