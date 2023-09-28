@@ -4,6 +4,7 @@ import chai, { assert, expect } from "chai";
 import sinon from "sinon";
 import sinonchai from "sinon-chai";
 import { Metric } from "types";
+import AWS from "aws-sdk";
 chai.use(sinonchai);
 
 
@@ -35,6 +36,37 @@ describe("index", () => {
 
 
 	it("default", async () => {
+		const getSecretValue = sandbox.stub()
+			.onFirstCall().returns(AWSRequest(new Error("Invalid Region")));
+
+		sandbox.stub(AWS, "SecretsManager").returns({ getSecretValue });
+		const reporter = new DynamicMetricReporter();
+		await reporter.start();
+		reporter.log({
+			id: "metric-id",
+			value: 1
+		});
+		await reporter.end();
+	});
+
+	function AWSRequest(response: AWS.SecretsManager.GetSecretValueResponse | Error) {
+		return {
+			promise: async () => {
+				if (response instanceof Error) {
+					throw response;
+				}
+				return response;
+			}
+		};
+	}
+
+	it("default with secret", async () => {
+		process.env.AWS_REGION = "us-east-1";
+
+		const getSecretValue = sandbox.stub()
+			.onFirstCall().returns(AWSRequest({ SecretString: JSON.stringify({}) }));
+
+		sandbox.stub(AWS, "SecretsManager").returns({ getSecretValue });
 		const reporter = new DynamicMetricReporter();
 		await reporter.start();
 		reporter.log({

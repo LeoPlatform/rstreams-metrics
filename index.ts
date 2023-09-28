@@ -1,3 +1,4 @@
+import AWS from "aws-sdk";
 import { AwsReporter } from "./aws-reporter";
 import { DataDogReporter } from "./datadog-reporter";
 import { Metric, MetricReporter, ReporterConfigs } from "./types";
@@ -18,8 +19,18 @@ export class DynamicMetricReporter implements MetricReporter {
 
 		if (reporters != null && reporters instanceof Promise) {
 			this.setupPromise = reporters as unknown as Promise<MetricReporter[] | ReporterConfigs>;
-		} else {
+		} else if (reporters != null) {
 			this.setupPromise = Promise.resolve(reporters);
+		} else {
+			this.setupPromise = (async () => {
+				const secret = await new AWS.SecretsManager({ region: process.env.AWS_REGION })
+					.getSecretValue({ SecretId: 'GlobalRSFMetricConfigs' })
+					.promise();
+				return JSON.parse(secret.SecretString);
+			})().catch(e => {
+				console.log("Error getting default secret 'GlobalRSFMetricConfigs'", e);
+				return null;
+			});
 		}
 
 		this.setupPromise.then((reporters: MetricReporter[] | ReporterConfigs) => {
