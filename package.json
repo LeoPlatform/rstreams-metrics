@@ -40,6 +40,6 @@
 	"dependencies": {
 		"async": "^3.2.4",
 		"datadog-lambda-js": "^6.78.0",
-		"leo-logger": "^1.0.1"
+		"leo-logger": "^1.0.3"
 	}
 }
