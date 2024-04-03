@@ -1,7 +1,6 @@
-import AWS, { CloudWatch } from "aws-sdk";
+import { CloudWatch, MetricDatum, StandardUnit } from "@aws-sdk/client-cloudwatch";
 import leoLogger from "leo-logger";
 import { Metric, MetricReporter, ReporterConfigs } from './types';
-import { MetricData } from 'aws-sdk/clients/cloudwatch';
 import async from 'async';
 import { removeColon } from "./utils";
 
@@ -35,7 +34,7 @@ export class AwsReporter implements MetricReporter {
 	sendMetrics: boolean;
 
 	constructor(config?: Partial<AWSConfig>) {
-		this.cloudwatch = new AWS.CloudWatch({
+		this.cloudwatch = new CloudWatch({
 			region: config?.region || process.env.AWS_REGION || "us-east-1"
 		});
 		this.sendMetrics = config?.dontSendMetrics !== true;
@@ -57,7 +56,7 @@ export class AwsReporter implements MetricReporter {
 
 	async send(metrics: Metric[]) {
 		// Split into chunks of 20.  AWS only allows 20 metrics per
-		const awsMetrics: MetricData[] = metrics.reduce((chunks, metric) => {
+		const awsMetrics: MetricDatum[][] = metrics.reduce((chunks, metric) => {
 			let currentChunk = chunks[chunks.length - 1];
 			if (currentChunk.length == AwsReporter.MetricsSendLimit) {
 				currentChunk = [];
@@ -90,18 +89,18 @@ export class AwsReporter implements MetricReporter {
 			currentChunk.push({
 				MetricName: metricId,
 				Value: metric.value,
-				Unit: units[0].toUpperCase() + units.substring(1),
+				Unit: units[0].toUpperCase() + units.substring(1) as StandardUnit,
 				Dimensions: tags,
 				Timestamp: metric.timestamp
 			});
 
 			return chunks;
-		}, [[]]).filter(a => a.length);
+		}, [[]] as MetricDatum[][]).filter(a => a.length);
 
 		// Send it all to AWS
 		if (this.sendMetrics) {
 			await new Promise((resolve, reject) => {
-				async.eachOfLimit(awsMetrics, 10, (value: MetricData, _key: string, cb) => {
+				async.eachOfLimit(awsMetrics, 10, (value: MetricDatum[], _key: string, cb) => {
 					this.cloudwatch.putMetricData({
 						Namespace: "rstreams",
 						MetricData: value
