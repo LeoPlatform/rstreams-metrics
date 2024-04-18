@@ -40,7 +40,7 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-cloudwatch": "^3.540.0",
-		"@aws-sdk/client-secrets-manager": "^3.540.0",
+		"@aws-sdk/client-secrets-manager": "^3.543.0",
 		"async": "^3.2.4",
 		"datadog-lambda-js": "^6.78.0",
 		"leo-logger": "^1.0.1"
