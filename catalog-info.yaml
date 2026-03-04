@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "rstreams-metrics"
+  description: "RStreams metrics reporting library for CloudWatch, DataDog, and OpenTelemetry"
+  annotations:
+    github.com/project-slug: LeoPlatform/rstreams-metrics
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - typescript
+    - metrics
+    - monitoring
+    - nodejs
+spec:
+  type: library
+  lifecycle: production
+  owner: "cup-shared-services"
